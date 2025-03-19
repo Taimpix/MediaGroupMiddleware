@@ -32,7 +32,7 @@ class MediaGroupMiddleware(BaseMiddleware):
                 "id": event.video.file_id
             })
 
-        # Если есть медиа
+        # If there is media
         if media_list:
             # If this is not a media group, we immediately send a single media
             if not event.media_group_id:
@@ -75,10 +75,10 @@ class MediaGroupMiddleware(BaseMiddleware):
 # Registering middleware
 dp.message.middleware(MediaGroupMiddleware())
 
-# Обработчик команды /start
+# Handler of the /start command
 @dp.message(Command("start"))
 async def start_command(message: types.Message):
-    await message.answer("Отправьте мне фото или альбом с фото/видео!")
+    await message.answer("Send me a photo or an album with photos/videos!")
 
 # Media group handler and single photos or videos 
 @dp.message(F.content_type.in_({'photo', 'video'}))
@@ -86,9 +86,9 @@ async def handle_media(message: types.Message, media_group: list = None, media_g
     if media_group and media_group_messages:
         media_count = len(media_group)
         if media_count == 1:
-            await message.answer(f"Получено одиночное медиа типа {media_group[0]['type']}")
+            await message.answer(f"A single media of the {media_group[0]['type']} type was received")
         else:
-            await message.answer(f"Получен альбом с {media_count} элементами")
+            await message.answer(f"An album with {media_count} elements was received")
         
         # We display information about each object
         for item in media_group:
