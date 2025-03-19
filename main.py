@@ -5,7 +5,8 @@ from aiogram.filters import Command
 import asyncio
 
 # Initializing the bot
-bot = Bot(token="TOKEN")
+api_token = "TOKEN"
+bot = Bot(token=api_token)
 dp = Dispatcher()
 
 # Middleware class for processing media groups and single media
