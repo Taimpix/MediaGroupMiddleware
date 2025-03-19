@@ -5,7 +5,7 @@ from aiogram.filters import Command
 import asyncio
 
 # Importing MediaGroupMiddleware from a file middlewares.py
-from middleware import MediaGroupMiddleware
+from middlewares import MediaGroupMiddleware
 
 # Initializing the bot
 api_token = "TOKEN"
