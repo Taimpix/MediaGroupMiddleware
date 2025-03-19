@@ -8,17 +8,17 @@ import asyncio
 bot = Bot(token="TOKEN")
 dp = Dispatcher()
 
-# Класс middleware для обработки медиа-групп и одиночных медиа
+# Middleware class for processing media groups and single media
 class MediaGroupMiddleware(BaseMiddleware):
     def __init__(self):
         super().__init__()
-        # Словарь для хранения медиа-групп
+        # Dictionary for storing media groups
         self.media_groups = {}
-        # Таймаут для ожидания всех медиа (в секундах)
+        # Timeout for waiting for all media (in seconds)
         self.timeout = 1.0
 
     async def __call__(self, handler, event: types.Message, data: dict):
-        # Создаем список медиа для текущего сообщения
+        # Creating a media list for the current message
         media_list = []
         
         if event.photo:
@@ -34,16 +34,12 @@ class MediaGroupMiddleware(BaseMiddleware):
 
         # Если есть медиа
         if media_list:
-            # Если это не медиа-группа, сразу передаем одиночное медиа
+            # If this is not a media group, we immediately send a single media
             if not event.media_group_id:
                 data["media_group"] = media_list
                 data["media_group_messages"] = [event]
                 return await handler(event, data)
-            
-            # Обработка медиа-группы
             media_group_id = event.media_group_id
-            
-            # Инициализируем группу, если она новая
             if media_group_id not in self.media_groups:
                 self.media_groups[media_group_id] = {
                     "media_list": [],
@@ -53,30 +49,30 @@ class MediaGroupMiddleware(BaseMiddleware):
             
             group = self.media_groups[media_group_id]
             
-            # Добавляем медиа в список
+            # Adding media to the list
             group["media_list"].extend(media_list)
             group["messages"].append(event)
             
-            # Если это первое сообщение в группе, запускаем задачу обработки
+            # If this is the first message, we run about
             if len(group["messages"]) == 1:
                 async def process_group():
                     await asyncio.sleep(self.timeout)
-                    # Передаем список словарей в хэндлер
+                    # Passing the dictionary list to the handler
                     data["media_group"] = group["media_list"]
                     data["media_group_messages"] = group["messages"]
                     await handler(event, data)
-                    # Очищаем группу после обработки
+                    # Clearing the group after processing
                     del self.media_groups[media_group_id]
                     
                 group["task"] = asyncio.create_task(process_group())
             
-            # Для всех сообщений группы возвращаем None, чтобы хэндлер не срабатывал отдельно
+            # For all messages in the group, we return None so that the handler does not fire separately.
             return None
         
-        # Если это не медиа, передаем управление дальше
+        # If it's not media, we pass the control on.
         return await handler(event, data)
 
-# Регистрируем middleware
+# Registering middleware
 dp.message.middleware(MediaGroupMiddleware())
 
 # Обработчик команды /start
@@ -84,7 +80,7 @@ dp.message.middleware(MediaGroupMiddleware())
 async def start_command(message: types.Message):
     await message.answer("Отправьте мне фото или альбом с фото/видео!")
 
-# Обработчик медиа-групп и одиночных медиа
+# Media group handler and single photos or videos 
 @dp.message(F.content_type.in_({'photo', 'video'}))
 async def handle_media(message: types.Message, media_group: list = None, media_group_messages: list = None):
     if media_group and media_group_messages:
@@ -94,11 +90,11 @@ async def handle_media(message: types.Message, media_group: list = None, media_g
         else:
             await message.answer(f"Получен альбом с {media_count} элементами")
         
-        # Выводим информацию о каждом элементе
+        # We display information about each object
         for item in media_group:
             print(f"Type: {item['type']}, ID: {item['id']}")
         
-        # Опционально: можно создать MediaGroupBuilder для отправки обратно
+        # Optional: you can create a MediaGroupBuilder to send back
         builder = MediaGroupBuilder()
         for item in media_group:
             if item["type"] == "photo":
@@ -111,7 +107,7 @@ async def handle_media(message: types.Message, media_group: list = None, media_g
             media=builder.build()
         )
 
-# Запуск бота
+# Launching the bot
 async def main():
     await dp.start_polling(bot)
 
