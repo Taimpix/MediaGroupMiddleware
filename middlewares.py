@@ -1,5 +1,6 @@
 from aiogram import types
 from aiogram import BaseMiddleware
+import asyncio
 
 # Middleware class for processing media groups and single media
 class MediaGroupMiddleware(BaseMiddleware):
